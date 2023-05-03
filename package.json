@@ -1,0 +1,35 @@
+{
+  "name": "prisma-erd-ws",
+  "type": "module",
+  "private": true,
+  "version": "1.0.0",
+  "description": "WebService to generate ERD from Prisma schema",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "dev": "nodemon"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/oxypomme/prisma-erd-ws.git"
+  },
+  "author": "oxypomme",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/oxypomme/prisma-erd-ws/issues"
+  },
+  "homepage": "https://github.com/oxypomme/prisma-erd-ws#readme",
+  "devDependencies": {
+    "eslint": "^8.39.0",
+    "eslint-config-airbnb-base": "^15.0.0",
+    "eslint-plugin-import": "^2.27.5",
+    "nodemon": "^2.0.22"
+  },
+  "dependencies": {
+    "@mermaid-js/mermaid-cli": "^10.1.0",
+    "@prisma/internals": "^4.13.0",
+    "cron": "^2.3.0",
+    "fastify": "^4.17.0",
+    "uuid": "^9.0.0"
+  }
+}
