@@ -1,6 +1,11 @@
+// @ts-check
 import fastify from '../lib/fastify.js';
 import renderSchemaToERD from '../lib/prisma/renderSchemaToERD.js';
 import renderSchemaToMermaid from '../lib/prisma/renderSchemaToMermaid.js';
+
+/**
+ * @typedef {{ format?: 'svg' | 'png' | 'pdf', theme?: string }} QueryParams
+ */
 
 /**
  * Gets if service is ok
@@ -19,7 +24,15 @@ fastify.post(
       },
     },
   },
-  (req) => renderSchemaToMermaid(req.body),
+  (req) => {
+    /**
+     * @type {string}
+     */
+    // eslint-disable-next-line prefer-destructuring
+    const body = /** * @type {string} */ (req.body);
+
+    return renderSchemaToMermaid(body);
+  },
 );
 
 /**
@@ -44,8 +57,19 @@ fastify.post(
     },
   },
   async (req, res) => {
-    const format = req.query.format ?? 'svg';
-    const data = await renderSchemaToERD(req.body, format, req.query.theme);
+    /**
+     * @type {QueryParams}
+     */
+    // eslint-disable-next-line prefer-destructuring
+    const query = /** * @type {QueryParams} */(req.query);
+    /**
+     * @type {string}
+     */
+    // eslint-disable-next-line prefer-destructuring
+    const body = /** * @type {string} */(req.body);
+
+    const format = query.format ?? 'svg';
+    const data = await renderSchemaToERD(body, format, query.theme);
 
     switch (format) {
       case 'svg':
