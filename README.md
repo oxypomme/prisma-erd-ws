@@ -11,7 +11,7 @@ Check if service is OK
 
 Generate [Mermaid.JS](https://mermaid.js.org/) model based on a Prisma schema
 
-### Body
+#### Body
 
 The prisma schema
 
@@ -19,10 +19,17 @@ The prisma schema
 
 Generate ERD based on a Prisma schema
 
-### Body
+#### Body
 
 The Prisma schema
 
-### Query parameters
+#### Query parameters
 
 - `format`: `'svg' | 'png' | 'pdf'`. In which format the ERD will be generated
+### POST /dict/
+
+Generate data dictionary based on a Prisma schema
+
+#### Body
+
+The Prisma schema

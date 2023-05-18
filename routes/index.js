@@ -1,5 +1,6 @@
 // @ts-check
 import fastify from '../lib/fastify.js';
+import { renderMDfromSchema } from '../lib/prisma/renderSchemaToDict.js';
 import renderSchemaToERD from '../lib/prisma/renderSchemaToERD.js';
 import renderSchemaToMermaid from '../lib/prisma/renderSchemaToMermaid.js';
 
@@ -87,5 +88,28 @@ fastify.post(
     }
 
     return data;
+  },
+);
+
+/**
+ * Transform given prisma schema into a data dict
+ */
+fastify.post(
+  '/dict/',
+  {
+    schema: {
+      body: {
+        type: 'string',
+      },
+    },
+  },
+  (req) => {
+    /**
+     * @type {string}
+     */
+    // eslint-disable-next-line prefer-destructuring
+    const body = /** * @type {string} */ (req.body);
+
+    return renderMDfromSchema('test', body);
   },
 );
