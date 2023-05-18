@@ -26,6 +26,7 @@ The Prisma schema
 #### Query parameters
 
 - `format`: `'svg' | 'png' | 'pdf'`. In which format the ERD will be generated
+
 ### POST /dict/
 
 Generate data dictionary based on a Prisma schema
@@ -33,3 +34,8 @@ Generate data dictionary based on a Prisma schema
 #### Body
 
 The Prisma schema
+
+#### Query parameters
+
+- `name`: `string`. Name of the dict. **Mandatory**
+- `format`: `'html' | 'md'`. In which format the dict will be generated

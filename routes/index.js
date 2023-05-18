@@ -3,9 +3,11 @@ import fastify from '../lib/fastify.js';
 import { renderMDfromSchema } from '../lib/prisma/renderSchemaToDict.js';
 import renderSchemaToERD from '../lib/prisma/renderSchemaToERD.js';
 import renderSchemaToMermaid from '../lib/prisma/renderSchemaToMermaid.js';
+import mdConverter from '../lib/showdown.js';
 
 /**
- * @typedef {{ format?: 'svg' | 'png' | 'pdf', theme?: string }} QueryParams
+ * @typedef {{ format?: 'svg' | 'png' | 'pdf', theme?: string }} QueryERDParams
+ * @typedef {{ format?: 'html' | 'md', name: string }} QueryDictParams
  */
 
 /**
@@ -59,10 +61,10 @@ fastify.post(
   },
   async (req, res) => {
     /**
-     * @type {QueryParams}
+     * @type {QueryERDParams}
      */
     // eslint-disable-next-line prefer-destructuring
-    const query = /** * @type {QueryParams} */(req.query);
+    const query = /** * @type {QueryERDParams} */(req.query);
     /**
      * @type {string}
      */
@@ -101,15 +103,41 @@ fastify.post(
       body: {
         type: 'string',
       },
+      querystring: {
+        name: {
+          type: 'string',
+        },
+        format: {
+          type: 'string',
+          enum: ['md', 'html'],
+        },
+      },
     },
   },
-  (req) => {
+  async (req, res) => {
+    /**
+     * @type {QueryDictParams}
+     */
+    // eslint-disable-next-line prefer-destructuring
+    const query = /** * @type {QueryDictParams} */(req.query);
     /**
      * @type {string}
      */
     // eslint-disable-next-line prefer-destructuring
     const body = /** * @type {string} */ (req.body);
 
-    return renderMDfromSchema('test', body);
+    if (!query.name) {
+      throw new Error('A name must be provided');
+    }
+
+    const format = query.format || 'md';
+    const md = await renderMDfromSchema(query.name, body);
+
+    if (format === 'html') {
+      res.type('text/html');
+      return mdConverter.makeHtml(md);
+    }
+    res.type('text/markdown');
+    return md;
   },
 );
