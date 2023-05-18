@@ -29,6 +29,7 @@
     "@mermaid-js/mermaid-cli": "^10.1.0",
     "@prisma/internals": "^4.13.0",
     "cron": "^2.3.0",
+    "dotenv": "^16.0.3",
     "fastify": "^4.17.0",
     "showdown": "^2.1.0",
     "uuid": "^9.0.0"
