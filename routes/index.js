@@ -4,6 +4,9 @@ import { renderMDfromSchema } from '../lib/prisma/renderSchemaToDict.js';
 import renderSchemaToERD from '../lib/prisma/renderSchemaToERD.js';
 import renderSchemaToMermaid from '../lib/prisma/renderSchemaToMermaid.js';
 import mdConverter from '../lib/showdown.js';
+import '../lib/keys.js';
+import { requireKey } from '../middlewares/auth.js';
+import './keys.js';
 
 /**
  * @typedef {{ format?: 'svg' | 'png' | 'pdf', theme?: string }} QueryERDParams
@@ -13,7 +16,7 @@ import mdConverter from '../lib/showdown.js';
 /**
  * Gets if service is ok
  */
-fastify.get('/', (req, res) => { res.send(); });
+fastify.get('/', (req, res) => { res.code(204); res.send(); });
 
 /**
  * Transform given prisma schema into a Mermaid
@@ -26,6 +29,7 @@ fastify.post(
         type: 'string',
       },
     },
+    preHandler: requireKey,
   },
   (req) => {
     /**
@@ -58,6 +62,7 @@ fastify.post(
         },
       },
     },
+    preHandler: requireKey,
   },
   async (req, res) => {
     /**
@@ -113,6 +118,7 @@ fastify.post(
         },
       },
     },
+    preHandler: requireKey,
   },
   async (req, res) => {
     /**
