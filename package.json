@@ -20,17 +20,20 @@
   },
   "homepage": "https://github.com/oxypomme/prisma-erd-ws#readme",
   "devDependencies": {
-    "eslint": "^8.39.0",
+    "@types/sanitize-html": "^2.9.0",
+    "eslint": "^8.45.0",
     "eslint-config-airbnb-base": "^15.0.0",
     "eslint-plugin-import": "^2.27.5",
-    "nodemon": "^2.0.22"
+    "nodemon": "^3.0.1"
   },
   "dependencies": {
-    "@mermaid-js/mermaid-cli": "^10.1.0",
-    "@prisma/internals": "^4.13.0",
-    "cron": "^2.3.0",
-    "dotenv": "^16.0.3",
-    "fastify": "^4.17.0",
+    "@mermaid-js/mermaid-cli": "^10.2.4",
+    "@prisma/internals": "^5.0.0",
+    "cron": "^2.3.1",
+    "dotenv": "^16.3.1",
+    "fastify": "^4.19.2",
+    "object-hash": "^3.0.0",
+    "sanitize-html": "^2.11.0",
     "showdown": "^2.1.0",
     "uuid": "^9.0.0"
   }

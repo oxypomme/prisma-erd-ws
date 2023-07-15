@@ -1,12 +1,17 @@
 // @ts-check
+import sanitizeHtml from 'sanitize-html';
+
 import fastify from '../lib/fastify.js';
 import { renderMDfromSchema } from '../lib/prisma/renderSchemaToDict.js';
 import renderSchemaToERD from '../lib/prisma/renderSchemaToERD.js';
 import renderSchemaToMermaid from '../lib/prisma/renderSchemaToMermaid.js';
 import mdConverter from '../lib/showdown.js';
 import '../lib/keys.js';
+
 import { requireKey } from '../middlewares/auth.js';
+
 import './keys.js';
+import { getCacheFromSchema, putCacheFromSchema } from '../lib/cache.js';
 
 /**
  * @typedef {{ format?: 'svg' | 'png' | 'pdf', theme?: string }} QueryERDParams
@@ -31,14 +36,20 @@ fastify.post(
     },
     preHandler: requireKey,
   },
-  (req) => {
+  async (req) => {
     /**
      * @type {string}
      */
     // eslint-disable-next-line prefer-destructuring
     const body = /** * @type {string} */ (req.body);
 
-    return renderSchemaToMermaid(body);
+    const cache = getCacheFromSchema(body, 'mermaid');
+    if (cache) {
+      return cache;
+    }
+
+    const mermaid = renderSchemaToMermaid(body);
+    return putCacheFromSchema(body, 'mermaid', await mermaid);
   },
 );
 
@@ -75,9 +86,7 @@ fastify.post(
      */
     // eslint-disable-next-line prefer-destructuring
     const body = /** * @type {string} */(req.body);
-
     const format = query.format ?? 'svg';
-    const data = await renderSchemaToERD(body, format, query.theme);
 
     switch (format) {
       case 'svg':
@@ -93,6 +102,15 @@ fastify.post(
       default:
         break;
     }
+
+    const cache = getCacheFromSchema(body, 'erd') ?? {};
+    if (cache[format]) {
+      return cache[format];
+    }
+
+    const data = await renderSchemaToERD(body, format, query.theme);
+    cache[format] = data;
+    putCacheFromSchema(body, 'erd', cache);
 
     return data;
   },
@@ -137,13 +155,33 @@ fastify.post(
     }
 
     const format = query.format || 'md';
-    const md = await renderMDfromSchema(query.name, body);
 
-    if (format === 'html') {
-      res.type('text/html');
-      return mdConverter.makeHtml(md);
+    const cache = getCacheFromSchema(body, 'dict') ?? {};
+    if (cache[format]) {
+      return cache[format];
     }
-    res.type('text/markdown');
-    return md;
+
+    let md = cache.md || '';
+    if (!md) {
+      md = await renderMDfromSchema(query.name, body);
+      cache.md = sanitizeHtml(md);
+    }
+
+    switch (format) {
+      case 'md':
+        res.type('text/markdown');
+        break;
+
+      case 'html':
+        res.type('text/html');
+        cache.html = sanitizeHtml(mdConverter.makeHtml(md));
+        break;
+
+      default:
+        break;
+    }
+
+    putCacheFromSchema(body, 'dict', cache);
+    return cache[format];
   },
 );
