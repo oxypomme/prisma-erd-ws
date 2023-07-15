@@ -1,11 +1,15 @@
 // @ts-check
+import sanitizeHtml from 'sanitize-html';
+
 import fastify from '../lib/fastify.js';
 import { renderMDfromSchema } from '../lib/prisma/renderSchemaToDict.js';
 import renderSchemaToERD from '../lib/prisma/renderSchemaToERD.js';
 import renderSchemaToMermaid from '../lib/prisma/renderSchemaToMermaid.js';
 import mdConverter from '../lib/showdown.js';
 import '../lib/keys.js';
+
 import { requireKey } from '../middlewares/auth.js';
+
 import './keys.js';
 
 /**
@@ -139,11 +143,13 @@ fastify.post(
     const format = query.format || 'md';
     const md = await renderMDfromSchema(query.name, body);
 
+    res.type('text/markdown');
+    let mdOrHTML = md;
     if (format === 'html') {
       res.type('text/html');
-      return mdConverter.makeHtml(md);
+      mdOrHTML = mdConverter.makeHtml(md);
     }
-    res.type('text/markdown');
-    return md;
+
+    return sanitizeHtml(mdOrHTML);
   },
 );
