@@ -11,6 +11,7 @@ import '../lib/keys.js';
 import { requireKey } from '../middlewares/auth.js';
 
 import './keys.js';
+import { getCacheFromSchema, putCacheFromSchema } from '../lib/cache.js';
 
 /**
  * @typedef {{ format?: 'svg' | 'png' | 'pdf', theme?: string }} QueryERDParams
@@ -35,14 +36,20 @@ fastify.post(
     },
     preHandler: requireKey,
   },
-  (req) => {
+  async (req) => {
     /**
      * @type {string}
      */
     // eslint-disable-next-line prefer-destructuring
     const body = /** * @type {string} */ (req.body);
 
-    return renderSchemaToMermaid(body);
+    const cache = getCacheFromSchema(body, 'mermaid');
+    if (cache) {
+      return cache;
+    }
+
+    const mermaid = renderSchemaToMermaid(body);
+    return putCacheFromSchema(body, 'mermaid', await mermaid);
   },
 );
 
@@ -79,9 +86,7 @@ fastify.post(
      */
     // eslint-disable-next-line prefer-destructuring
     const body = /** * @type {string} */(req.body);
-
     const format = query.format ?? 'svg';
-    const data = await renderSchemaToERD(body, format, query.theme);
 
     switch (format) {
       case 'svg':
@@ -97,6 +102,15 @@ fastify.post(
       default:
         break;
     }
+
+    const cache = getCacheFromSchema(body, 'erd') ?? {};
+    if (cache[format]) {
+      return cache[format];
+    }
+
+    const data = await renderSchemaToERD(body, format, query.theme);
+    cache[format] = data;
+    putCacheFromSchema(body, 'erd', cache);
 
     return data;
   },
@@ -141,15 +155,33 @@ fastify.post(
     }
 
     const format = query.format || 'md';
-    const md = await renderMDfromSchema(query.name, body);
 
-    res.type('text/markdown');
-    let mdOrHTML = md;
-    if (format === 'html') {
-      res.type('text/html');
-      mdOrHTML = mdConverter.makeHtml(md);
+    const cache = getCacheFromSchema(body, 'dict') ?? {};
+    if (cache[format]) {
+      return cache[format];
     }
 
-    return sanitizeHtml(mdOrHTML);
+    let md = cache.md || '';
+    if (!md) {
+      md = await renderMDfromSchema(query.name, body);
+      cache.md = sanitizeHtml(md);
+    }
+
+    switch (format) {
+      case 'md':
+        res.type('text/markdown');
+        break;
+
+      case 'html':
+        res.type('text/html');
+        cache.html = sanitizeHtml(mdConverter.makeHtml(md));
+        break;
+
+      default:
+        break;
+    }
+
+    putCacheFromSchema(body, 'dict', cache);
+    return cache[format];
   },
 );
