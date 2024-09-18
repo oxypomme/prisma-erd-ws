@@ -31,7 +31,7 @@
     "@prisma/internals": "^5.0.0",
     "cron": "^2.3.1",
     "dotenv": "^16.3.1",
-    "fastify": "^4.19.2",
+    "fastify": "^4.28.1",
     "object-hash": "^3.0.0",
     "sanitize-html": "^2.12.1",
     "showdown": "^2.1.0",
