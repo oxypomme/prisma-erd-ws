@@ -27,7 +27,7 @@
     "nodemon": "^3.0.1"
   },
   "dependencies": {
-    "@mermaid-js/mermaid-cli": "^10.2.4",
+    "@mermaid-js/mermaid-cli": "^11.2.0",
     "@prisma/internals": "^5.0.0",
     "cron": "^2.3.1",
     "dotenv": "^16.3.1",
